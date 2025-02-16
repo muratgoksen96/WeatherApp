@@ -52,7 +52,7 @@ body {
     width: 170px;
     margin-top: 30px;
 }
-.weatehr h1{
+.weather h1{
     font-size: 80px;
     font-weight: 500;
 }
@@ -81,4 +81,18 @@ body {
 .humidity, .wind{
     font-size: 28px;
     margin-top: -6px;
+}
+    .weather{
+        display: none;
+    }
+.error{ 
+    text-align: left;
+    font-size: 14px;
+    margin-left: 10px;
+    margin-top: 10px;
+    display: none;
+}
+
+.error.show {
+    display: block;
 }

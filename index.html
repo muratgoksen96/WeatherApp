@@ -11,9 +11,12 @@
     <div class="search">
         <input type="text" placeholder="Enter City Name" 
         spellcheck="false">
-        <button><img src="images/search.png"></button>
+        <button onclick="checkWeather(searchBox.value)"><img src="images/search.png"></button>
     </div>
-    <div class="weather">
+    <div class="error" style="display: none;">
+        <p>City Not Found</p>
+    </div>
+    <div class="weather" style="display: none;">
         <img src="images/rain.png" class="weather-icon">
         <h1 class="temp">22°C</h1>
         <h2 class="city">London</h2>
@@ -36,17 +39,81 @@
     <script>
 
         const apiKey = "04546a5c59355525c4e4f3eca326e1f2";
-        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=London";
-        async function checkWeather() {
-            const response = await fetch(apiUrl + `&appid=${apiKey}`);
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric&q=";
+
+        const searchBox = document.querySelector(".search input");
+        const searchBtn = document.querySelector(".search button");
+        const weatherIcon = document.querySelector(".weather-icon");
+
+
+        async function checkWeather(city) {
+    if (city.trim() === "") {
+        alert("Please enter a city name!");
+        return;
+    }
+    
+    try {
+        const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+        
+        if (response.status === 404) {
+            // Show error message if city is not found
+            document.querySelector(".error").style.display = "block";
+            document.querySelector(".weather").style.display = "none";
+        } else {
+            document.querySelector(".error").style.display = "none"; // Hide error
             var data = await response.json();
+            
+            if (data.cod === "404") {
+                // In case the API returns a 404-like response
+                document.querySelector(".error").style.display = "block";
+                document.querySelector(".weather").style.display = "none";
+            } else {
+                // Display weather information
+                document.querySelector(".city").innerHTML = data.name;
+                document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+                document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+                document.querySelector(".wind").innerHTML = data.wind.speed + "mph";
 
-            console.log(data);
+                if (data.weather[0].main == "Clouds") {
+                    weatherIcon.src = "images/clouds.png";
+                } else if (data.weather[0].main == "Rain") {
+                    weatherIcon.src = "images/rain.png";
+                } else if (data.weather[0].main == "Clear") {
+                    weatherIcon.src = "images/clear.png";
+                } else if (data.weather[0].main == "Drizzle") {
+                    weatherIcon.src = "images/drizzle.png";
+                } else if (data.weather[0].main == "Mist") {
+                    weatherIcon.src = "images/mist.png";
+                }
+                
+                // Show the weather details
+                document.querySelector(".weather").style.display = "block";
+            }
         }
+    } catch (error) {
+        // If there's a network or any other error
+        console.error("Error fetching weather data: ", error);
+        document.querySelector(".error").innerHTML = "Failed to fetch data. Please try again.";
+        document.querySelector(".error").style.display = "block";
+        document.querySelector(".weather").style.display = "none";
+    }
+}
 
-checkWeather()
+// Event listener for the 'Enter' key press
+searchBox.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        checkWeather(searchBox.value);
+    }
+});
+
+// Event listener for the search button click
+searchBtn.addEventListener("click", () => {
+    checkWeather(searchBox.value);
+});
 </script>
 
 
 </body>
 </html>
+
